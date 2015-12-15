@@ -3,13 +3,13 @@ package com.home.intelligentsystems.cardreader;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -23,6 +23,16 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewAuthenticationResult;
     TextView textViewCard;
     ImageView imageView;
+
+    IntentResult mIntentResult;
+
+    private boolean authorize() {
+        String contents = mIntentResult.getContents();
+        if (contents.equals("8961006010078")) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +56,17 @@ public class MainActivity extends AppCompatActivity {
         buttonAuthenticate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(true)
-                {
-                    textViewAuthenticationResult.setTextColor(getResources().getColor(R.color.colorDarkGreen));
-                    textViewAuthenticationResult.setText("AUTHORIZED");
+                if (mIntentResult == null) {
+                    Toast.makeText(MainActivity.this, "Please scan card", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                else
-                {
 
+                if (authorize()) {
+                    textViewAuthenticationResult.setTextColor(getResources().getColor(R.color.colorGreen));
+                    textViewAuthenticationResult.setText("AUTHORIZED");
+                } else {
+                    textViewAuthenticationResult.setTextColor(getResources().getColor(R.color.colorRed));
+                    textViewAuthenticationResult.setText("UN-AUTHORIZED");
                 }
             }
         });
@@ -66,19 +79,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        IntentResult intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-        //Toast.makeText(this,intentResult.getContents(),Toast.LENGTH_LONG).show();
-        String result = String.format("Content: %s\nFormat: %s",
-                intentResult.getContents(),
-                intentResult.getFormatName());
+        mIntentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
+        //Toast.makeText(this,mIntentResult.getContents(),Toast.LENGTH_LONG).show();
+        String result = String.format("Content: %s\nFormat: %s", mIntentResult.getContents(), mIntentResult.getFormatName());
         textViewCard.setText(result);
 
-        File imgFile = new  File(intentResult.getBarcodeImagePath());
-        if(imgFile.exists()){
+        File imgFile = new File(mIntentResult.getBarcodeImagePath());
+        if (imgFile.exists()) {
             Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
             imageView.setImageBitmap(myBitmap);
         }
+
+        textViewAuthenticationResult.setText("");
     }
 
     @Override
