@@ -3,6 +3,7 @@ package com.home.intelligentsystems.cardreader;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -18,6 +19,8 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity {
 
     Button buttonScanCard;
+    Button buttonAuthenticate;
+    TextView textViewAuthenticationResult;
     TextView textViewCard;
     ImageView imageView;
 
@@ -39,7 +42,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        buttonAuthenticate = (Button) findViewById(R.id.button_authenticate);
+        buttonAuthenticate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(true)
+                {
+                    textViewAuthenticationResult.setTextColor(Color.GREEN);
+                    textViewAuthenticationResult.setText("AUTHORIZED");
+                }
+                else
+                {
+
+                }
+            }
+        });
+
         textViewCard = (TextView) findViewById(R.id.text_card);
+        textViewAuthenticationResult = (TextView) findViewById(R.id.text_authentication_result);
         imageView = (ImageView) findViewById(R.id.image_scan);
     }
 
