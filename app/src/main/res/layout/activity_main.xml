@@ -20,7 +20,7 @@
         android:id="@+id/button_authenticate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/scan_card" />
+        android:text="@string/authenticate" />
 
     <TextView
         android:id="@+id/text_card"
