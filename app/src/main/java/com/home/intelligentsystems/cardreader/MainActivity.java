@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(true)
                 {
-                    textViewAuthenticationResult.setTextColor(Color.GREEN);
+                    textViewAuthenticationResult.setTextColor(getResources().getColor(R.color.colorDarkGreen));
                     textViewAuthenticationResult.setText("AUTHORIZED");
                 }
                 else

@@ -37,6 +37,7 @@
         android:id="@+id/text_authentication_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textAlignment="center"
         android:textSize="18sp" />
 
 </LinearLayout>
