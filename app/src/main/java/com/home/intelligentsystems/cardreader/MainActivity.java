@@ -4,7 +4,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -13,10 +16,11 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.home.intelligentsystems.cardreader.Model.Employee;
 
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TaskDelegate {
 
     Button buttonScanCard;
     Button buttonAuthenticate;
@@ -26,7 +30,11 @@ public class MainActivity extends AppCompatActivity {
 
     IntentResult mIntentResult;
 
-    private boolean authorize() {
+    private boolean isEmployeeAuthorized() {
+
+        WebAPIHandler webAPIHandler = new WebAPIHandler(this);
+        webAPIHandler.execute(Common.SERVICE_URL);
+
         String contents = mIntentResult.getContents();
         if (contents.equals("8961006010078")) {
             return true;
@@ -34,10 +42,19 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    private void setupActionBar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(R.string.app_name);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setupActionBar();
 
         buttonScanCard = (Button) findViewById(R.id.button_scan_card);
         buttonScanCard.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                if (authorize()) {
+                if (isEmployeeAuthorized()) {
                     textViewAuthenticationResult.setTextColor(getResources().getColor(R.color.colorGreen));
                     textViewAuthenticationResult.setText("AUTHORIZED");
                 } else {
@@ -80,16 +97,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (data == null)
+            return;
+
+        File file;
+        Bitmap bitmap;
+        String result;
+
         mIntentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
         //Toast.makeText(this,mIntentResult.getContents(),Toast.LENGTH_LONG).show();
-        String result = String.format("Content: %s\nFormat: %s", mIntentResult.getContents(), mIntentResult.getFormatName());
+        result = String.format("Content: %s\nFormat: %s", mIntentResult.getContents(), mIntentResult.getFormatName());
         textViewCard.setText(result);
 
-        File imgFile = new File(mIntentResult.getBarcodeImagePath());
-        if (imgFile.exists()) {
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            imageView.setImageBitmap(myBitmap);
+        file = new File(mIntentResult.getBarcodeImagePath());
+        if (file.exists()) {
+            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+            imageView.setImageBitmap(bitmap);
         }
 
         textViewAuthenticationResult.setText("");
@@ -106,5 +130,16 @@ public class MainActivity extends AppCompatActivity {
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         textViewCard.setText(savedInstanceState.getString(Common.CARD_CONTENT));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void taskCompletionResult(Employee employee) {
+        Toast.makeText(this, employee.toString(), Toast.LENGTH_SHORT).show();
     }
 }
