@@ -140,6 +140,18 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
 
     @Override
     public void taskCompletionResult(Employee employee) {
-        Toast.makeText(this, employee.toString(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, employee.toString(), Toast.LENGTH_SHORT).show();
+
+        ImageView imageView = (ImageView) findViewById(R.id.image_employee);
+        TextView textViewName = (TextView) findViewById(R.id.text_employee_name);
+        TextView textViewPhone1 = (TextView) findViewById(R.id.text_employee_phone1);
+        TextView textViewAddress = (TextView) findViewById(R.id.text_employee_address);
+
+        Bitmap bitmap = BitmapFactory.decodeByteArray(employee.getPhotoBytes(), 0, employee.getPhotoBytes().length);
+        imageView.setImageBitmap(bitmap);
+
+        textViewName.setText(employee.getName());
+        textViewPhone1.setText(employee.getPhone1());
+        textViewAddress.setText(employee.getAddress());
     }
 }
