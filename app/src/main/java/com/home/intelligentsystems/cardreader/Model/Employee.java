@@ -2,13 +2,14 @@ package com.home.intelligentsystems.cardreader.Model;
 
 import android.util.Base64;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
 /**
  * Created by intelligentsystems on 16/12/15.
  */
 
-public class Employee {
+public class Employee implements Serializable{
     private int Id;
     private String Name;
     private String Phone1;

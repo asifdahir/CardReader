@@ -22,25 +22,12 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity implements TaskDelegate {
 
+    WebAPIHandler webAPIHandler;
+    IntentResult intentResult;
     Button buttonScanCard;
     Button buttonAuthenticate;
-    TextView textViewAuthenticationResult;
     TextView textViewCard;
     ImageView imageView;
-
-    IntentResult mIntentResult;
-
-    private boolean isEmployeeAuthorized() {
-
-        WebAPIHandler webAPIHandler = new WebAPIHandler(this);
-        webAPIHandler.execute(Common.SERVICE_URL);
-
-        String contents = mIntentResult.getContents();
-        if (contents.equals("8961006010078")) {
-            return true;
-        }
-        return false;
-    }
 
     private void setupActionBar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -73,24 +60,18 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
         buttonAuthenticate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mIntentResult == null) {
+                if (intentResult == null) {
                     Toast.makeText(MainActivity.this, "Please scan card", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                if (isEmployeeAuthorized()) {
-                    textViewAuthenticationResult.setTextColor(getResources().getColor(R.color.colorGreen));
-                    textViewAuthenticationResult.setText("AUTHORIZED");
-                } else {
-                    textViewAuthenticationResult.setTextColor(getResources().getColor(R.color.colorRed));
-                    textViewAuthenticationResult.setText("UN-AUTHORIZED");
-                }
+                webAPIHandler = new WebAPIHandler(MainActivity.this);
+                webAPIHandler.execute(intentResult.getContents());
             }
         });
 
-        textViewCard = (TextView) findViewById(R.id.text_card);
-        textViewAuthenticationResult = (TextView) findViewById(R.id.text_authentication_result);
-        imageView = (ImageView) findViewById(R.id.image_scan);
+
+        textViewCard = (TextView) findViewById(R.id.text_card_id);
+        imageView = (ImageView) findViewById(R.id.image_card_scan);
     }
 
     @Override
@@ -104,32 +85,30 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
         Bitmap bitmap;
         String result;
 
-        mIntentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-        //Toast.makeText(this,mIntentResult.getContents(),Toast.LENGTH_LONG).show();
-        result = String.format("Content: %s\nFormat: %s", mIntentResult.getContents(), mIntentResult.getFormatName());
+        //Toast.makeText(this,intentResult.getContents(),Toast.LENGTH_LONG).show();
+        //result = String.format("Content: %s\nFormat: %s", intentResult.getContents(), intentResult.getFormatName());
+        result = String.format("Card ID: %s", intentResult.getContents());
         textViewCard.setText(result);
 
-        file = new File(mIntentResult.getBarcodeImagePath());
+        file = new File(intentResult.getBarcodeImagePath());
         if (file.exists()) {
             bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             imageView.setImageBitmap(bitmap);
         }
-
-        textViewAuthenticationResult.setText("");
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putString(Common.CARD_CONTENT, textViewCard.getText().toString());
-
+        savedInstanceState.putString(Common.KEY_CARD_CONTENT, textViewCard.getText().toString());
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        textViewCard.setText(savedInstanceState.getString(Common.CARD_CONTENT));
+        textViewCard.setText(savedInstanceState.getString(Common.KEY_CARD_CONTENT));
     }
 
     @Override
@@ -140,18 +119,26 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
 
     @Override
     public void taskCompletionResult(Employee employee) {
-        //Toast.makeText(this, employee.toString(), Toast.LENGTH_SHORT).show();
 
-        ImageView imageView = (ImageView) findViewById(R.id.image_employee);
-        TextView textViewName = (TextView) findViewById(R.id.text_employee_name);
-        TextView textViewPhone1 = (TextView) findViewById(R.id.text_employee_phone1);
-        TextView textViewAddress = (TextView) findViewById(R.id.text_employee_address);
+        WebAPIOperationResult operationResult;
+        Intent intent;
 
-        Bitmap bitmap = BitmapFactory.decodeByteArray(employee.getPhotoBytes(), 0, employee.getPhotoBytes().length);
-        imageView.setImageBitmap(bitmap);
+        if (webAPIHandler == null) return;
 
-        textViewName.setText(employee.getName());
-        textViewPhone1.setText(employee.getPhone1());
-        textViewAddress.setText(employee.getAddress());
+        operationResult = webAPIHandler.getOperationResult();
+        switch (operationResult) {
+            case COMPLETED:
+            case FILE_NOT_FOUND:
+                intent = new Intent(this, EmployeeActivity.class);
+                intent.putExtra(Common.KEY_EMPLOYEE, employee);
+                startActivity(intent);
+                break;
+            case CONNECTION_ERROR:
+                Toast.makeText(this, "Connection to server failed", Toast.LENGTH_SHORT).show();
+                break;
+            case ERROR_IN_READING_DATA:
+                Toast.makeText(this, "Error in reading data from server", Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 }
