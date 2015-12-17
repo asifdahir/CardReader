@@ -41,12 +41,12 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:background="@color/colorPrimary" />
 
-
             <ImageView
                 android:id="@+id/image_employee"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center" />
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:scaleType="fitXY" />
 
             <TextView
                 android:id="@+id/text_employee_name"
