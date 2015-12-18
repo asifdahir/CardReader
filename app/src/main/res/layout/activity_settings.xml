@@ -44,6 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/service_url"
+            android:inputType="textUri"
             android:paddingTop="@dimen/activity_vertical_margin" />
 
     </LinearLayout>
