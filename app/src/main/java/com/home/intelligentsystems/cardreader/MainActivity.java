@@ -1,6 +1,8 @@
 package com.home.intelligentsystems.cardreader;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -8,6 +10,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,8 +27,10 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
 
     WebAPIHandler webAPIHandler;
     IntentResult intentResult;
+    ProgressDialog progressDialog;
     Button buttonScanCard;
     Button buttonAuthenticate;
+    Button buttonClear;
     TextView textViewCard;
     ImageView imageView;
 
@@ -42,6 +47,9 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
         setContentView(R.layout.activity_main);
 
         setupActionBar();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(Common.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+        Common.SERVICE_URL = sharedPreferences.getString(Common.SHARED_PREFERENCES_KEY_SERVICE_URL, "");
 
         buttonScanCard = (Button) findViewById(R.id.button_scan_card);
         buttonScanCard.setOnClickListener(new View.OnClickListener() {
@@ -64,11 +72,28 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
                     Toast.makeText(MainActivity.this, "Please scan card", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+                progressDialog = new ProgressDialog(MainActivity.this);
+                progressDialog.setMessage("Operation in progress...");
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setIndeterminate(true);
+                progressDialog.show();
+
                 webAPIHandler = new WebAPIHandler(MainActivity.this);
                 webAPIHandler.execute(intentResult.getContents());
             }
         });
 
+        buttonClear = (Button) findViewById(R.id.button_clear);
+        buttonClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                webAPIHandler = null;
+                intentResult = null;
+                textViewCard.setText("");
+                imageView.setImageResource(0);
+            }
+        });
 
         textViewCard = (TextView) findViewById(R.id.text_card_id);
         imageView = (ImageView) findViewById(R.id.image_card_scan);
@@ -88,8 +113,8 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
         intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
         //Toast.makeText(this,intentResult.getContents(),Toast.LENGTH_LONG).show();
-        //result = String.format("Content: %s\nFormat: %s", intentResult.getContents(), intentResult.getFormatName());
-        result = String.format("Card ID: %s", intentResult.getContents());
+        result = String.format("Code: %s\nFormat: %s", intentResult.getContents(), intentResult.getFormatName());
+        //result = String.format("Card ID: %s", intentResult.getContents());
         textViewCard.setText(result);
 
         file = new File(intentResult.getBarcodeImagePath());
@@ -118,10 +143,23 @@ public class MainActivity extends AppCompatActivity implements TaskDelegate {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void taskCompletionResult(Employee employee) {
 
         WebAPIOperationResult operationResult;
         Intent intent;
+
+        if (progressDialog != null)
+            progressDialog.dismiss();
 
         if (webAPIHandler == null) return;
 

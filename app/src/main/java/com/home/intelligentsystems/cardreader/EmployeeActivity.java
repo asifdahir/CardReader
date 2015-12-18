@@ -3,9 +3,11 @@ package com.home.intelligentsystems.cardreader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,7 +32,6 @@ public class EmployeeActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(R.string.app_name);
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
     }
 
     @Override
@@ -58,9 +59,15 @@ public class EmployeeActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeByteArray(employee.getPhotoBytes(), 0, employee.getPhotoBytes().length);
             imageView.setImageBitmap(bitmap);
 
-            textViewName.setText(employee.getName());
-            textViewPhone1.setText(employee.getPhone1());
-            textViewAddress.setText(employee.getAddress());
+            textViewName.setText("Name: " + employee.getName());
+            textViewPhone1.setText("Phone: " + employee.getPhone1());
+            textViewAddress.setText("Address: " + employee.getAddress());
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        onBackPressed();
+        return true;
     }
 }

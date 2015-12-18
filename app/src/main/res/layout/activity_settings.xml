@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.home.intelligentsystems.cardreader.MainActivity">
+    tools:context="com.home.intelligentsystems.cardreader.SettingsActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -28,37 +28,23 @@
         android:paddingTop="@dimen/activity_vertical_margin">
 
         <Button
-            android:id="@+id/button_scan_card"
+            android:id="@+id/button_save"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/scan" />
+            android:text="@string/save" />
 
         <Button
-            android:id="@+id/button_authenticate"
+            android:id="@+id/button_cacnel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/authenticate" />
+            android:text="@string/cancel" />
 
-        <Button
-            android:id="@+id/button_clear"
+        <EditText
+            android:id="@+id/edit_service_url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/clear" />
-
-        <TextView
-            android:id="@+id/text_card_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
+            android:hint="@string/service_url"
             android:paddingTop="@dimen/activity_vertical_margin" />
-
-        <ImageView
-            android:id="@+id/image_card_scan"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:scaleType="fitCenter" />
 
     </LinearLayout>
 
